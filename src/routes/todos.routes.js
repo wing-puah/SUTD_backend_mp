@@ -1,9 +1,9 @@
-const express = require('express')
-const Item = require('../models/item')
+const express = require('express');
+const Todo = require('../models/todo.model');
 
 module.exports = (db) => {
-  const router = express.Router()
-  
+  const router = express.Router();
+
   /**
    * @openapi
    * components:
@@ -42,12 +42,12 @@ module.exports = (db) => {
    *              $ref: '#/components/schemas/Item'
    */
   router.post('/', async (req, res, next) => {
-    const uid = req.uid
-    const { name, quantity } = req.body
-    const newItem = new Item({ name, quantity, uid })
-    const item = await db.insertItem(newItem)
-    res.status(201).send(item)
-  })
+    const uid = req.uid;
+    const { name, quantity } = req.body;
+    const newTodo = new Todo({ name, quantity, uid });
+    const item = await db.insertItem(newTodo);
+    res.status(201).send(item);
+  });
 
   /**
    * @openapi
@@ -67,9 +67,9 @@ module.exports = (db) => {
    *                $ref: '#/components/schemas/Item'
    */
   router.get('/', async (req, res, next) => {
-    const items = await db.findAllItems()
-    res.send(items)
-  })
+    const items = await db.findAllItems();
+    res.send(items);
+  });
 
   /**
    * @openapi
@@ -93,14 +93,14 @@ module.exports = (db) => {
    *              $ref: '#/components/schemas/Item'
    */
   router.get('/:id', async (req, res, next) => {
-    const id = req.params.id
-    const item = await db.findItem(id)
+    const id = req.params.id;
+    const item = await db.findItem(id);
     if (item) {
-      res.send(item)
+      res.send(item);
     } else {
-      res.status(400).send(`Item id ${id} not found`)
+      res.status(400).send(`Item id ${id} not found`);
     }
-  })
+  });
 
   /**
    * @openapi
@@ -130,13 +130,13 @@ module.exports = (db) => {
    *              $ref: '#/components/schemas/Item'
    */
   router.put('/:id', async (req, res, next) => {
-    const uid = req.uid
-    const id = req.params.id
-    const { name, quantity } = req.body
-    const updatedItem = new Item({ name, quantity, uid })
-    const item = await db.updateItem(id, updatedItem)
-    res.send(item)
-  })
+    const uid = req.uid;
+    const id = req.params.id;
+    const { name, quantity } = req.body;
+    const updatedItem = new Item({ name, quantity, uid });
+    const item = await db.updateItem(id, updatedItem);
+    res.send(item);
+  });
 
   /**
    * @openapi
@@ -156,14 +156,14 @@ module.exports = (db) => {
    *        description: OK
    */
   router.delete('/:id', async (req, res, next) => {
-    const id = req.params.id
-    const success = await db.deleteItem(id)
+    const id = req.params.id;
+    const success = await db.deleteItem(id);
     if (success) {
-      res.send(`Deleted item ${id} successfully`)
+      res.send(`Deleted item ${id} successfully`);
     } else {
-      res.status(400).send(`Item id ${id} not found`)
+      res.status(400).send(`Item id ${id} not found`);
     }
-  })
+  });
 
-  return router
-}
+  return router;
+};

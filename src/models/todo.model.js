@@ -1,8 +1,7 @@
 class Todo {
-  constructor({ id, title, description, uid }) {
+  constructor({ id, title, uid }) {
     this.id = id;
     this.title = title;
-    this.description = description;
     this.uid = uid;
   }
 }

@@ -1,7 +1,7 @@
-const express = require('express')
+const express = require('express');
 
 module.exports = (service) => {
-  const router = express.Router()
+  const router = express.Router();
 
   /**
    * @openapi
@@ -39,14 +39,14 @@ module.exports = (service) => {
    *        description: Username already exists
    */
   router.post('/register', async (req, res, next) => {
-    const { username, password } = req.body
-    const token = await service.registerUser(username, password)
+    const { username, password } = req.body;
+    const token = await service.registerUser(username, password);
     if (token) {
-      res.send({ token: token })
+      res.send({ token: token });
     } else {
-      res.status(400).send(`Username ${username} already exists`)
+      res.status(400).send(`Username ${username} already exists`);
     }
-  })
+  });
 
   /**
    * @openapi
@@ -68,14 +68,14 @@ module.exports = (service) => {
    *        description: Invalid login credentials
    */
   router.post('/login', async (req, res, next) => {
-    const { username, password } = req.body
-    const token = await service.loginUser(username, password)
+    const { username, password } = req.body;
+    const token = await service.loginUser(username, password);
     if (token) {
-      res.send({ token: token })
+      res.send({ token: token });
     } else {
-      res.status(400).send('Invalid login credentials')
+      res.status(400).send('Invalid login credentials');
     }
-  })
+  });
 
-  return router
-}
+  return router;
+};
