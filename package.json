@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "eslint:fix": "eslint --fix",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "db:migrate": "node scripts/migrate.js",
+    "start:consumer": "node src/services/email/consumer.js",
+    "eslint:fix": "eslint --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
     "express-ws": "^5.0.2",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.6.5",
     "pg": "^8.7.1",
     "socket.io": "^4.2.0",
     "socket.io-client": "^4.2.0",
@@ -41,6 +44,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.1.0",
+    "nodemon": "^2.0.13",
     "supertest": "^6.1.6"
   }
 }

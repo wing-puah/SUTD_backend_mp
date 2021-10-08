@@ -1,9 +1,10 @@
 module.exports = (service) => {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
+
     if (token) {
-      const uid = service.verifyToken(token);
+      const uid = await service.verifyToken(token);
       if (uid !== null) {
         req.uid = uid;
         return next();

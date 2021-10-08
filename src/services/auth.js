@@ -13,36 +13,38 @@ module.exports = (db) => {
     return jwt.sign({ uid }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
   };
 
-  service.registerUser = async (username, password) => {
-    const user = await db.findUserByUsername(username);
+  service.registerUser = async (email, password) => {
+    const user = await db.findUserByUid(email);
     if (user) {
       return null;
     } else {
       const passwordHash = await bcrypt.hash(String(password), SALT_ROUNDS);
-      const newUser = new User({ username, password_hash: passwordHash });
+      const newUser = new User({ email, password_hash: passwordHash });
 
       const user = await db.insertUser(newUser);
 
-      return service.generateToken(user.id);
+      return service.generateToken(user.email);
     }
   };
 
-  service.loginUser = async (username, password) => {
-    const user = await db.findUserByUsername(username);
+  service.loginUser = async (email, password) => {
+    const user = await db.findUserByUid(email);
     if (user) {
       const isValid = await bcrypt.compare(String(password), String(user.password_hash));
       if (isValid) {
-        return service.generateToken(user.id);
+        return service.generateToken(user.email);
       }
     }
     return null;
   };
 
-  service.verifyToken = (token) => {
+  service.verifyToken = async (token) => {
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      return decoded.uid;
+      const user = await db.findUserByUid(decoded.uid);
+      return user.email;
     } catch (err) {
+      console.error({ error: err.message });
       return null;
     }
   };
