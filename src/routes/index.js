@@ -2,7 +2,7 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
-module.exports = (authMiddleware, authService, db) => {
+module.exports = (authMiddleware, todoAuthMiddleware, authService, db) => {
   const router = express.Router();
 
   /**
@@ -37,8 +37,7 @@ module.exports = (authMiddleware, authService, db) => {
 
   // All routes from this point will use the auth middleware
   router.use(authMiddleware);
-
-  router.use('/todos', require('./todos.routes')(db));
+  router.use('/todos', require('./todos.routes')(db, todoAuthMiddleware));
 
   return router;
 };

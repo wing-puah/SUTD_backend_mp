@@ -7,6 +7,7 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "db:migrate": "node scripts/migrate.js",
+    "db:drop": "node scripts/drop.js",
     "start:consumer": "node src/services/email/consumer.js",
     "eslint:fix": "eslint --fix",
     "test": "echo \"Error: no test specified\" && exit 1"

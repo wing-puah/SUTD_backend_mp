@@ -5,7 +5,7 @@ const UserTodoMap = require('../models/userTodoMap.model');
 const itemsRoutes = require('./items.routes');
 const { queueUserInvites } = require('../services/email/producer');
 
-module.exports = (db) => {
+module.exports = (db, todoAuthMiddleware) => {
   const router = express.Router();
 
   /**
@@ -103,10 +103,10 @@ module.exports = (db) => {
    *            schema:
    *              $ref: '#/components/schemas/Item'
    */
-  router.get('/:id', async (req, res, next) => {
+  router.get('/:todoId', todoAuthMiddleware, async (req, res, next) => {
     try {
       const uid = req.uid;
-      const id = req.params.id;
+      const id = req.params.todoId;
       const item = await db.findTodo(id, uid);
 
       if (!item) {
@@ -114,11 +114,7 @@ module.exports = (db) => {
         return;
       }
 
-      if (item.uid !== req.uid) {
-        res.status(403).send(`You have no permission to view ${id}`);
-      } else {
-        res.send(item);
-      }
+      res.send(item);
     } catch (error) {
       next(error);
     }
@@ -151,23 +147,18 @@ module.exports = (db) => {
    *            schema:
    *              $ref: '#/components/schemas/Item'
    */
-  router.put('/:id', async (req, res, next) => {
+  router.put('/:todoId', todoAuthMiddleware, async (req, res, next) => {
     try {
-      const uid = req.uid;
-      const id = req.params.id;
+      const id = req.params.todoId;
       const { title } = req.body;
-
-      const userTodoMap = new UserTodoMap({ uid, tid: id });
-      const permission = await db.getTodoWithUser(userTodoMap);
-
-      if (!permission) {
-        res.status(403).json({ error: `Todo ${id} is not found for user` });
-        return;
-      }
-
       const updatedItem = new Todo({ title, id });
       const item = await db.updateTodo(updatedItem);
-      res.send(item);
+
+      if (item) {
+        res.send(item);
+      } else {
+        res.status(400).json({ error: `Todo id ${id} not found for user` });
+      }
     } catch (error) {
       next(error);
     }
@@ -190,18 +181,9 @@ module.exports = (db) => {
    *      200:
    *        description: OK
    */
-  router.delete('/:id', async (req, res, next) => {
+  router.delete('/:todoId', todoAuthMiddleware, async (req, res, next) => {
     try {
-      const uid = req.uid;
-      const id = req.params.id;
-
-      const userTodoMap = new UserTodoMap({ uid, tid: id });
-      const permission = await db.getTodoWithUser(userTodoMap);
-
-      if (!permission) {
-        res.status(403).json({ error: `Todo ${id} is not found for user` });
-        return;
-      }
+      const id = req.params.todoId;
 
       const success = await db.deleteTodo(id);
       if (success) {
@@ -214,10 +196,10 @@ module.exports = (db) => {
     }
   });
 
-  router.put('/:id/users', async (req, res, next) => {
+  router.put('/:todoId/users', todoAuthMiddleware, async (req, res, next) => {
     try {
       const uid = req.uid;
-      const id = req.params.id;
+      const id = req.params.todoId;
 
       const userTodoMap = new UserTodoMap({ uid, tid: id });
       const permission = await db.getTodoWithUser(userTodoMap);
@@ -233,6 +215,6 @@ module.exports = (db) => {
     }
   });
 
-  itemsRoutes(db, router);
+  itemsRoutes(db, router, todoAuthMiddleware);
   return router;
 };

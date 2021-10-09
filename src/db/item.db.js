@@ -11,26 +11,17 @@ module.exports = (pool) => {
     return new Item(res.rows[0]);
   };
 
-  db.findAllItems = async () => {
-    const res = await pool.query('SELECT * FROM Item');
-    return res.rows.map((row) => new Item(row));
-  };
-
-  db.findItem = async (id) => {
-    const res = await pool.query('SELECT * FROM Item WHERE id = $1', [id]);
-    return res.rowCount ? new Item(res.rows[0]) : null;
-  };
-
-  db.updateItem = async (id, item) => {
+  db.updateItem = async (item) => {
+    console.log({ item });
     const res = await pool.query(
-      'UPDATE Item SET name=$2, quantity=$3, uid=$4,  WHERE id=$1 RETURNING *',
-      [id, item.name, item.quantity, item.tid]
+      'UPDATE Item SET description=$3 WHERE id=$1 AND tid=$2 RETURNING *',
+      [item.id, item.tid, item.description]
     );
-    return new Item(res.rows[0]);
+    return res.rowCount > 0 ? new Item(res.rows[0]) : null;
   };
 
-  db.deleteItem = async (id) => {
-    const res = await pool.query('DELETE FROM Item WHERE id=$1', [id]);
+  db.deleteItem = async (item) => {
+    const res = await pool.query('DELETE FROM Item WHERE id=$1 AND tid=$2', [item.id, item.tid]);
     return res.rowCount > 0;
   };
 

@@ -26,28 +26,27 @@ module.exports = (pool) => {
     return res.rows.map((row) => new UserTodoMap(row));
   };
 
-  db.findTodo = async (id, userId) => {
-    console.log({ userId, id });
+  db.findTodo = async (id) => {
     const res = await pool.query(
       `
-        SELECT t.*, um.*, items
-        FROM Todo t 
-          JOIN User_todo_map um ON t.id=um.tid
-          LEFT JOIN (
-            SELECT i.* FROM Item i
-            WHERE i.tid=$1
-          ) AS items ON t.id=items.tid
-        WHERE t.id=$1 AND um.uid=$2
-      `,
-      [id, userId]
+    SELECT *, 
+      (SELECT 
+      TO_JSONB(ARRAY_AGG(i))
+      FROM Item i WHERE tid=$1) AS items
+    FROM Todo t 
+    WHERE t.id=$1;
+    `,
+      [id]
     );
-    return res.rowCount ? new UserTodoMap(res.rows[0]) : null;
+
+    return res.rowCount > 0 ? res.rows[0] : null;
   };
 
   db.updateTodo = async (todo) => {
     const { title, id } = todo;
     const res = await pool.query(`UPDATE Todo SET title=$1 WHERE id=$2 RETURNING *`, [title, id]);
-    return new Todo(res.rows[0]);
+
+    return res.rowCount > 0 ? new Todo(res.rows[0]) : null;
   };
 
   db.deleteTodo = async (id) => {

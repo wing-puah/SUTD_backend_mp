@@ -1,24 +1,48 @@
 const UserTodoMap = require('../models/userTodoMap.model');
 const Item = require('../models/item.model');
 
-module.exports = (db, router) => {
-  router.post('/:todoId/items', async (req, res, next) => {
+module.exports = (db, router, todoAuthMiddleware) => {
+  router.post('/:todoId/items', todoAuthMiddleware, async (req, res, next) => {
     try {
-      const uid = req.uid;
       const tid = req.params.todoId;
-
-      const userTodoMap = new UserTodoMap({ uid, tid });
-      const permission = await db.getTodoWithUser(userTodoMap);
-
-      if (!permission) {
-        res.status(403).json({ error: `Todo ${tid} is not found for user` });
-        return;
-      }
 
       const { description } = req.body;
       const item = new Item({ description, tid });
       const insertedItem = await db.insertItem(item);
       res.status(201).send(insertedItem);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.put('/:todoId/items/:itemId', todoAuthMiddleware, async (req, res, next) => {
+    try {
+      const { todoId, itemId } = req.params;
+      const { description } = req.body;
+      const item = new Item({ id: itemId, description, tid: todoId });
+      const updatedItem = await db.updateItem(item);
+
+      if (updatedItem) {
+        res.status(201).send(updatedItem);
+      } else {
+        res.status(400).json({ error: `Item ${id} not found for user` });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete('/:todoId/items/:itemId', todoAuthMiddleware, async (req, res, next) => {
+    try {
+      const { todoId, itemId } = req.params;
+      const item = new Item({ id: itemId, tid: todoId });
+      const deletdItem = await db.deleteItem(item);
+
+      if (deletdItem) {
+        res.status(201).send(deletdItem);
+      } else {
+        res.status(400).json({ error: `Item ${todoId} not found for user` });
+      }
     } catch (error) {
       next(error);
     }
