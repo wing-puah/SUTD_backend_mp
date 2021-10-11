@@ -1,6 +1,7 @@
 require('dotenv').config();
 const amqplib = require('amqplib');
 const nodemailer = require('nodemailer');
+const db = require('../../db');
 
 const queue = 'invites';
 
@@ -34,21 +35,41 @@ function createEmail(email) {
     const client = await amqplib.connect(process.env.RABBITMQ_URL);
     const channel = await client.createChannel();
     await channel.assertQueue(queue);
-    channel.consume(queue, (msg) => {
-      const data = JSON.parse(msg.content);
-      const mailOptions = createEmail(data.email);
+
+    channel.consume(queue, async (msg) => {
+      const { uid, tid, role } = JSON.parse(msg.content);
+      console.log({ Uid });
+      const user = await db.findUserByUid(uid);
+      console.log({ user });
+      if (!user) {
+        channel.ack(msg);
+        return;
+      }
+
+      const updateUserMap = await db.givePermissionToUser({ uid, tid, role });
+      console.log({ updateUserMap });
+      if (!updateUserMap) {
+        throw new Error(`Issue with updating user`);
+      }
+
+      const mailOptions = createEmail(uid);
 
       transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.error(`Error encountered: ${error}`);
-          channel.nack(msg);
-        } else {
-          console.log(`Email sent: ${JSON.stringify(mailOptions)}`);
-          channel.ack(msg);
-        }
+        _handleMailer(error, channel, msg, mailOptions);
       });
     });
   } catch (error) {
+    channel.nack(msg);
     console.error('Issuse with rabbitmq', error);
   }
 })();
+
+function _handleMailer(error, channel, msg, mailOptions) {
+  if (error) {
+    console.error(`Error encountered: ${error}`);
+    channel.nack(msg);
+  } else {
+    console.log(`Email sent: ${JSON.stringify(mailOptions)}`);
+    channel.ack(msg);
+  }
+}

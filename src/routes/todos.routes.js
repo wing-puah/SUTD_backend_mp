@@ -198,19 +198,13 @@ module.exports = (db, todoAuthMiddleware) => {
 
   router.put('/:todoId/users', todoAuthMiddleware, async (req, res, next) => {
     try {
-      const uid = req.uid;
       const id = req.params.todoId;
+      const { user } = req.body;
 
-      const userTodoMap = new UserTodoMap({ uid, tid: id });
-      const permission = await db.getTodoWithUser(userTodoMap);
-
-      if (!permission) {
-        res.status(403).json({ error: `Todo ${id} is not found for user` });
-        return;
-      }
-
-      queueUserInvites(new UserTodoMap(permission));
+      res.status(200).send(`Updating user`);
+      await queueUserInvites(new UserTodoMap({ uid: user, tid: id, role: 'editor' }));
     } catch (error) {
+      console.error(error);
       next(error);
     }
   });

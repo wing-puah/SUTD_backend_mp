@@ -31,5 +31,17 @@ module.exports = (pool) => {
     return res.rowCount ? new UserTodoMap(res.rows[0]) : null;
   };
 
+  db.givePermissionToUser = async (userTodoMap) => {
+    const res = await pool.query(
+      `INSERT INTO User_todo_map (uid, tid, role) 
+          VALUES ($1,$2, $3) 
+          ON CONFLICT DO NOTHING
+        RETURNING *`,
+      [userTodoMap.uid, userTodoMap.tid, userTodoMap.role]
+    );
+
+    return res.rowCount ? new UserTodoMap(res.rows[0]) : null;
+  };
+
   return db;
 };
