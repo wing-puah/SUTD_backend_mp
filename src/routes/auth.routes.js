@@ -10,10 +10,10 @@ module.exports = (service) => {
    *    User:
    *      type: object
    *      required:
-   *        - username
+   *        - email
    *        - password
    *      properties:
-   *        username:
+   *        email:
    *          type: string
    *        password:
    *          type: string
@@ -36,7 +36,7 @@ module.exports = (service) => {
    *      200:
    *        description: OK
    *      400:
-   *        description: Username already exists
+   *        description: Email already exists
    */
   router.post('/register', async (req, res, next) => {
     try {
@@ -46,7 +46,7 @@ module.exports = (service) => {
       if (token) {
         res.send({ token: token });
       } else {
-        res.status(400).send(`Email ${email} already exists`);
+        res.status(400).send(`Email already exists`);
       }
     } catch (error) {
       next(error);
@@ -73,12 +73,16 @@ module.exports = (service) => {
    *        description: Invalid login credentials
    */
   router.post('/login', async (req, res, next) => {
-    const { email, password } = req.body;
-    const token = await service.loginUser(email, password);
-    if (token) {
-      res.send({ token: token });
-    } else {
-      res.status(400).send('Invalid login credentials');
+    try {
+      const { email, password } = req.body;
+      const token = await service.loginUser(email, password);
+      if (token) {
+        res.send({ token: token });
+      } else {
+        res.status(400).send('Invalid login credentials');
+      }
+    } catch (error) {
+      next(error);
     }
   });
 

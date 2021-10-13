@@ -12,38 +12,43 @@ module.exports = (db, todoAuthMiddleware) => {
    * @openapi
    * components:
    *  schemas:
-   *    Item:
+   *    Todo:
    *      type: object
    *      required:
-   *        - name
-   *        - quantity
+   *        - title
    *      properties:
-   *        name:
+   *        title:
    *          type: string
-   *        quantity:
-   *          type: integer
+   *
+   *    Email:
+   *      type: object
+   *      required:
+   *        - user
+   *      properties:
+   *        user:
+   *          type: string
    */
 
   /**
    * @openapi
-   * /items:
+   * /todos:
    *  post:
    *    tags:
-   *    - items
-   *    description: Create an item
+   *    - todos
+   *    description: Create a Todo
    *    requestBody:
    *      required: true
    *      content:
    *        application/json:
    *          schema:
-   *            $ref: '#/components/schemas/Item'
+   *            $ref: '#/components/schemas/Todo'
    *    responses:
    *      201:
    *        description: Created
    *        content:
    *          application/json:
    *            schema:
-   *              $ref: '#/components/schemas/Item'
+   *              $ref: '#/components/schemas/Todo'
    */
   router.post('/', async (req, res, next) => {
     try {
@@ -58,11 +63,11 @@ module.exports = (db, todoAuthMiddleware) => {
 
   /**
    * @openapi
-   * /items:
+   * /todos:
    *  get:
    *    tags:
-   *    - items
-   *    description: Get all items
+   *    - todos
+   *    description: Get all todos
    *    responses:
    *      200:
    *        description: OK
@@ -71,12 +76,12 @@ module.exports = (db, todoAuthMiddleware) => {
    *            schema:
    *              type: array
    *              items:
-   *                $ref: '#/components/schemas/Item'
+   *                $ref: '#/components/schemas/Todo'
    */
   router.get('/', async (req, res, next) => {
     try {
-      const items = await db.findAllTodos(req.uid);
-      res.send(items);
+      const todos = await db.findAllTodos(req.uid);
+      res.send(todos);
     } catch (error) {
       next(error);
     }
@@ -84,11 +89,11 @@ module.exports = (db, todoAuthMiddleware) => {
 
   /**
    * @openapi
-   * /items/{id}:
+   * /todos/{id}:
    *  get:
    *    tags:
-   *    - items
-   *    description: Get item
+   *    - todos
+   *    description: Get single todo
    *    parameters:
    *      - in: path
    *        name: id
@@ -101,7 +106,7 @@ module.exports = (db, todoAuthMiddleware) => {
    *        content:
    *          application/json:
    *            schema:
-   *              $ref: '#/components/schemas/Item'
+   *              $ref: '#/components/schemas/Todo'
    */
   router.get('/:todoId', todoAuthMiddleware, async (req, res, next) => {
     try {
@@ -122,11 +127,11 @@ module.exports = (db, todoAuthMiddleware) => {
 
   /**
    * @openapi
-   * /items/{id}:
+   * /todos/{id}:
    *  put:
    *    tags:
-   *    - items
-   *    description: Update an item
+   *    - todos
+   *    description: Update a todo
    *    parameters:
    *      - in: path
    *        name: id
@@ -138,14 +143,16 @@ module.exports = (db, todoAuthMiddleware) => {
    *      content:
    *        application/json:
    *          schema:
-   *            $ref: '#/components/schemas/Item'
+   *            $ref: '#/components/schemas/Todo'
    *    responses:
    *      200:
    *        description: OK
    *        content:
    *          application/json:
    *            schema:
-   *              $ref: '#/components/schemas/Item'
+   *              $ref: '#/components/schemas/Todo'
+   *      400:
+   *        description: To do id not found for user
    */
   router.put('/:todoId', todoAuthMiddleware, async (req, res, next) => {
     try {
@@ -166,10 +173,10 @@ module.exports = (db, todoAuthMiddleware) => {
 
   /**
    * @openapi
-   * /items/{id}:
+   * /todos/{id}:
    *  delete:
    *    tags:
-   *    - items
+   *    - todos
    *    description: Delete an item
    *    parameters:
    *      - in: path
@@ -180,6 +187,8 @@ module.exports = (db, todoAuthMiddleware) => {
    *    responses:
    *      200:
    *        description: OK
+   *      400:
+   *        description: Issue encountered with deleting
    */
   router.delete('/:todoId', todoAuthMiddleware, async (req, res, next) => {
     try {
@@ -196,6 +205,29 @@ module.exports = (db, todoAuthMiddleware) => {
     }
   });
 
+  /**
+   * @openapi
+   * /todos/{id}/users:
+   *  put:
+   *    tags:
+   *    - todos
+   *    description: Allow user access to todo
+   *    parameters:
+   *      - in: path
+   *        name: id
+   *        schema:
+   *          type: integer
+   *        required: true
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        application/json:
+   *          schema:
+   *            $ref: '#/components/schemas/Email'
+   *    responses:
+   *      200:
+   *        description: Updating user
+   */
   router.put('/:todoId/users', todoAuthMiddleware, async (req, res, next) => {
     try {
       const id = req.params.todoId;

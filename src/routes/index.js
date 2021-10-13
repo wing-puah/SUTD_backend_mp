@@ -12,7 +12,7 @@ module.exports = (authMiddleware, todoAuthMiddleware, authService, db) => {
    *    description: Default route
    *    responses:
    *      200:
-   *        description: OK
+   *        description: Hello world!
    */
   router.get('/', (req, res, next) => {
     res.send('Hello world!');
