@@ -10,7 +10,7 @@
     "db:drop": "node scripts/drop.js",
     "start:consumer": "node src/services/email/consumer.js",
     "eslint:fix": "eslint --fix",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand --coverage"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/wing-puah/SUTD_backend_mp#readme",
   "dependencies": {
+    "@jest-mock/express": "^1.4.5",
     "amqplib": "^0.8.0",
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",

@@ -32,7 +32,7 @@ function createEmail(email) {
 
 (async () => {
   try {
-    const client = await amqplib.connect(process.env.RABBITMQ_URL);
+    const client = await amqplib.connect(process.env.CLOUDAMQP_URL);
     const channel = await client.createChannel();
     await channel.assertQueue(queue);
 
