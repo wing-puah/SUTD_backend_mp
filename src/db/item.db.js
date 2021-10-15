@@ -12,7 +12,6 @@ module.exports = (pool) => {
   };
 
   db.updateItem = async (item) => {
-    console.log({ item });
     const res = await pool.query(
       'UPDATE Item SET description=$3 WHERE id=$1 AND tid=$2 RETURNING *',
       [item.id, item.tid, item.description]

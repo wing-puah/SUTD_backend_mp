@@ -1,53 +1,7 @@
 const UserTodoMap = require('../models/userTodoMap.model');
 const Item = require('../models/item.model');
 
-/**
- * @openapi
- * components:
- *  schemas:
- *    Item:
- *      type: object
- *      required:
- *        - description
- *      properties:
- *        description:
- *          type: string
- *
- *    Error:
- *      type: object
- *      properties:
- *        error:
- *          type: string
- */
-
 module.exports = (db, router, todoAuthMiddleware) => {
-  /**
-   * @openapi
-   * /todos/{id}/items:
-   *  post:
-   *    tags:
-   *    - items
-   *    description: Create an item of the todo list
-   *    parameters:
-   *      - in: path
-   *        name: id
-   *        schema:
-   *          type: integer
-   *        required: true
-   *    requestBody:
-   *      required: true
-   *      content:
-   *        application/json:
-   *          schema:
-   *            $ref: '#/components/schemas/Item'
-   *    responses:
-   *      201:
-   *        description: Created
-   *        content:
-   *          application/json:
-   *            schema:
-   *              $ref: '#/components/schemas/Item'
-   */
   router.post('/:todoId/items', todoAuthMiddleware, async (req, res, next) => {
     try {
       const tid = req.params.todoId;
@@ -61,44 +15,6 @@ module.exports = (db, router, todoAuthMiddleware) => {
     }
   });
 
-  /**
-   * @openapi
-   * /todos/{id}/items/{itemId}:
-   *  put:
-   *    tags:
-   *    - items
-   *    description: Update an item of the todo list
-   *    parameters:
-   *      - in: path
-   *        name: id
-   *        schema:
-   *          type: integer
-   *        required: true
-   *      - in: path
-   *        name: itemId
-   *        schema:
-   *          type: integer
-   *        required: true
-   *    requestBody:
-   *      required: true
-   *      content:
-   *        application/json:
-   *          schema:
-   *            $ref: '#/components/schemas/Item'
-   *    responses:
-   *      201:
-   *        description: Created
-   *        content:
-   *          application/json:
-   *            schema:
-   *              $ref: '#/components/schemas/Item'
-   *      400:
-   *        description: Error
-   *        content:
-   *          application/json:
-   *            schema:
-   *              $ref: '#/components/schemas/Error'
-   */
   router.put('/:todoId/items/:itemId', todoAuthMiddleware, async (req, res, next) => {
     try {
       const { todoId, itemId } = req.params;
@@ -116,44 +32,6 @@ module.exports = (db, router, todoAuthMiddleware) => {
     }
   });
 
-  /**
-   * @openapi
-   * /todos/{id}/items/{itemId}:
-   *  delete:
-   *    tags:
-   *    - items
-   *    description: Delete an item of the todo list
-   *    parameters:
-   *      - in: path
-   *        name: id
-   *        schema:
-   *          type: integer
-   *        required: true
-   *      - in: path
-   *        name: itemId
-   *        schema:
-   *          type: integer
-   *        required: true
-   *    requestBody:
-   *      required: true
-   *      content:
-   *        application/json:
-   *          schema:
-   *            $ref: '#/components/schemas/Item'
-   *    responses:
-   *      201:
-   *        description: Created
-   *        content:
-   *          application/json:
-   *            schema:
-   *              $ref: '#/components/schemas/Item'
-   *      400:
-   *        description: Error
-   *        content:
-   *          application/json:
-   *            schema:
-   *              $ref: '#/components/schemas/Error'
-   */
   router.delete('/:todoId/items/:itemId', todoAuthMiddleware, async (req, res, next) => {
     try {
       const { todoId, itemId } = req.params;
@@ -161,9 +39,9 @@ module.exports = (db, router, todoAuthMiddleware) => {
       const deletdItem = await db.deleteItem(item);
 
       if (deletdItem) {
-        res.status(201).send(deletdItem);
+        res.status(201).send({ id: Number(itemId), tid: Number(todoId), status: 'deleted' });
       } else {
-        res.status(400).json({ error: `Item ${todoId} not found for user` });
+        res.status(400).json({ error: `Item ${itemId} from todo ${todoId} not found for user` });
       }
     } catch (error) {
       next(error);

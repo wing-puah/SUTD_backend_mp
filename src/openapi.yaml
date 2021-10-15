@@ -1,0 +1,358 @@
+openapi: '3.0.0'
+info:
+  version: 1.0.0
+  title: SUTD backend capstone
+  description: This is sample server.
+  termsOfService: http://swagger.io/terms/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:3000
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+        tid:
+          type: integer
+        description:
+          type: string
+        status:
+          type: string
+
+    Todo:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        id:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+
+    List:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    Token:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    Email:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+paths:
+  /:
+    get:
+      description: Default route
+      responses:
+        200:
+          description: Hello world!
+
+  /register:
+    post:
+      tags:
+        - auth
+      description: Register a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        400:
+          description: Email already exists
+
+  /login:
+    post:
+      tags:
+        - auth
+      description: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        400:
+          description: Invalid login credentials
+
+  /todos:
+    post:
+      tags:
+        - todos
+      description: Create a Todo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+
+    get:
+      tags:
+        - todos
+      description: Get all todos
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+
+  /todos/{id}:
+    get:
+      tags:
+        - todos
+      description: Get single todo
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+
+    put:
+      tags:
+        - todos
+      description: Update a todo
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        403:
+          description: To do id not found for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - todos
+      description: Delete an item
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+        400:
+          description: Issue encountered with deleting
+
+  /todos/{id}/users:
+    put:
+      tags:
+        - todos
+      description: Allow user access to todo
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Email'
+      responses:
+        200:
+          description: Updating user
+
+  /todos/{id}/items:
+    post:
+      tags:
+        - items
+      description: Create an item of the todo list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+
+  /todos/{id}/items/{itemId}:
+    put:
+      tags:
+        - items
+      description: Update an item of the todo list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: itemId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        400:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - items
+      description: Delete an item of the todo list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: itemId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        403:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        400:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
