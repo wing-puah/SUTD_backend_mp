@@ -36,6 +36,7 @@ db.initialise = async () => {
   `);
 
   await pool.query(`
+    DROP TYPE ROLE
     CREATE TYPE role AS ENUM ('creator', 'editor');
     CREATE TABLE IF NOT EXISTS User_todo_map (
       uid VARCHAR(320) NOT NULL,
