@@ -12,6 +12,7 @@ module.exports = (db) => {
   const service = {};
 
   service.generateToken = (uid) => {
+    console.log({ JWT_SECRET });
     return jwt.sign({ uid }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
   };
 
@@ -46,7 +47,6 @@ module.exports = (db) => {
       const user = await db.findUserByUid(decoded.uid);
       return user.email;
     } catch (err) {
-      console.error({ error: err.message });
       return null;
     }
   };
@@ -56,7 +56,6 @@ module.exports = (db) => {
       const userTodoMap = new UserTodoMap({ uid: userId, tid: todoId });
       return await db.getTodoWithUser(userTodoMap);
     } catch (error) {
-      console.error({ error: err.message });
       return null;
     }
   };

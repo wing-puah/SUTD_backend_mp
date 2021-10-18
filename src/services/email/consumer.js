@@ -38,16 +38,14 @@ function createEmail(email) {
 
     channel.consume(queue, async (msg) => {
       const { uid, tid, role } = JSON.parse(msg.content);
-      console.log({ Uid });
       const user = await db.findUserByUid(uid);
-      console.log({ user });
+
       if (!user) {
         channel.ack(msg);
         return;
       }
 
       const updateUserMap = await db.givePermissionToUser({ uid, tid, role });
-      console.log({ updateUserMap });
       if (!updateUserMap) {
         throw new Error(`Issue with updating user`);
       }
