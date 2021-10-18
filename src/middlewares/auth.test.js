@@ -32,14 +32,14 @@ describe('Authentication middleware', () => {
     it('should call next if token is valid', async () => {
       service.verifyToken.mockReturnValue(1);
       const { res, next } = getMockRes();
-      authMiddleware(req, res, next);
+      await authMiddleware(req, res, next);
       expect(next).toBeCalled();
     });
 
     it('should return 401 if token is not valid', async () => {
       service.verifyToken.mockReturnValue(null);
       const { res, next } = getMockRes();
-      authMiddleware(req, res, next);
+      await authMiddleware(req, res, next);
       expect(next).not.toBeCalled();
       expect(res.status).toBeCalledWith(401);
     });

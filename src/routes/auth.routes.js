@@ -4,7 +4,6 @@ module.exports = (service) => {
   const router = express.Router();
 
   router.post('/register', async (req, res, next) => {
-    console.log('register');
     try {
       const { email, password } = req.body;
       const token = await service.registerUser(email, password);

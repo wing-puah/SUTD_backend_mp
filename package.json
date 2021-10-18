@@ -10,7 +10,8 @@
     "db:drop": "node scripts/drop.js",
     "start:consumer": "node src/services/email/consumer.js",
     "eslint:fix": "eslint --fix",
-    "test": "jest --runInBand --coverage"
+    "test": "jest --runInBand --coverage",
+    "test:watch": "jest --watch --runInBand"
   },
   "repository": {
     "type": "git",

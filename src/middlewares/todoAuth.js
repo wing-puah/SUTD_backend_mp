@@ -13,7 +13,6 @@ module.exports = (service) => {
 
       return next();
     } catch (error) {
-      console.error('error in todo auth');
       next(error);
     }
   };

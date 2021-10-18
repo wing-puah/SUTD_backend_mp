@@ -5,6 +5,7 @@ module.exports = (service) => {
 
     if (token) {
       const uid = await service.verifyToken(token);
+
       if (uid !== null) {
         req.uid = uid;
         return next();
