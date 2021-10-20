@@ -1,6 +1,6 @@
 const express = require('express');
 
-module.exports = (authMiddleware, todoAuthMiddleware, authService, db) => {
+function createRoutes(authMiddleware, todoAuthMiddleware, authService, db) {
   const router = express.Router();
 
   router.get('/', (req, res, next) => {
@@ -15,4 +15,6 @@ module.exports = (authMiddleware, todoAuthMiddleware, authService, db) => {
   router.use('/todos', require('./todos.routes')(db, todoAuthMiddleware));
 
   return router;
-};
+}
+
+export default createRoutes;
