@@ -1,4 +1,4 @@
-require('dotenv').config();
+import env from 'dotenv';
 import { createApp } from './app';
 import createRoutes from './routes';
 
@@ -7,6 +7,8 @@ import AuthService from './services/auth.service';
 import TodoAuthMiddleware from './middlewares/todoAuth';
 
 import db from './db';
+
+env.config();
 
 const authService = AuthService(db);
 const authMiddleware = AuthMiddleware(authService);

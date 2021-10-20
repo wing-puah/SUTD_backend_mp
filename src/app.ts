@@ -1,13 +1,10 @@
-console.log("i'm in server");
-console.log('yea');
-
 import express, { Express, Router, Request, Response, NextFunction } from 'express';
-const logger = require('morgan');
-const path = require('path');
+import logger from 'morgan';
+import path from 'path';
 
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
-const OpenApiValidator = require('express-openapi-validator');
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
 
 function errorResponder(err: Error, req: Request, res: Response, next: NextFunction) {
   res.status(500).json({ error: err.message });
@@ -17,8 +14,7 @@ export const createApp = (router: Router): Express => {
   const app = express();
   app.use(express.json());
   app.use(logger('common'));
-  // console.log({ __dirname, chdir :});
-  console.log({ _path: path.join(process.cwd(), `src/openapi.yaml`) });
+
   const apiSpec = path.join(process.cwd(), `src/openapi.yaml`);
   const options = {
     definition: {
@@ -36,7 +32,7 @@ export const createApp = (router: Router): Express => {
 
   app.use('/spec', express.static(apiSpec));
   app.use(
-    OpenApiValidator.middleware({
+    OpenApiMiddleware({
       apiSpec,
       validateRequests: true,
       validateResponses: true,
