@@ -1,5 +1,5 @@
-const Todo = require('../models/todo.model');
-const UserTodoMap = require('../models/userTodoMap.model');
+import { Todo } from '../models/todo.model';
+import { UserTodoMap } from '../models/userTodoMap.model';
 
 module.exports = (pool) => {
   const db = {};

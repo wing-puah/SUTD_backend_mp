@@ -1,4 +1,4 @@
-const User = require('../models/user.model');
+import { User } from '../models/user.model';
 
 module.exports = (pool) => {
   const db = {};
@@ -8,6 +8,7 @@ module.exports = (pool) => {
       'INSERT INTO App_user (email,password_hash) VALUES ($1,$2) RETURNING *',
       [user.email, user.password_hash]
     );
+
     return new User(res.rows[0]);
   };
 

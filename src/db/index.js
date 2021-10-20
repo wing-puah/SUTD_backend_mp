@@ -1,7 +1,7 @@
-const { Pool } = require('pg');
+import { Pool } from 'pg';
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: String(process.env.DATABASE_URL),
 });
 
 const db = {
@@ -74,4 +74,4 @@ db.end = async () => {
   await pool.end();
 };
 
-module.exports = db;
+export default db;

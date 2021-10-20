@@ -7,7 +7,7 @@ module.exports = (service) => {
     try {
       const { email, password } = req.body;
       const token = await service.registerUser(email, password);
-
+      console.log('finish token');
       if (token) {
         res.send({ token });
       } else {

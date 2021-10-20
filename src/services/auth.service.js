@@ -1,23 +1,23 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
-const User = require('../models/user.model');
-const UserTodoMap = require('../models/userTodoMap.model');
+import { User } from '../models/user.model';
+import { UserTodoMap } from '../models/userTodoMap.model';
 
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = process.env.JWT_EXPIRY;
 
-module.exports = (db) => {
+export default function AuthService(db) {
   const service = {};
 
   service.generateToken = (uid) => {
-    console.log({ JWT_SECRET });
     return jwt.sign({ uid }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
   };
 
   service.registerUser = async (email, password) => {
     const user = await db.findUserByUid(email);
+
     if (user) {
       return null;
     } else {
@@ -61,4 +61,4 @@ module.exports = (db) => {
   };
 
   return service;
-};
+}

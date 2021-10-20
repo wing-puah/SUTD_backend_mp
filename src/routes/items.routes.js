@@ -1,5 +1,4 @@
-const UserTodoMap = require('../models/userTodoMap.model');
-const Item = require('../models/item.model');
+import { Item } from '../models/item.model';
 
 module.exports = (db, router, todoAuthMiddleware) => {
   router.post('/:todoId/items', todoAuthMiddleware, async (req, res, next) => {

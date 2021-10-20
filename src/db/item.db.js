@@ -1,4 +1,4 @@
-const Item = require('../models/item.model');
+import { Item } from '../models/item.model';
 
 module.exports = (pool) => {
   const db = {};

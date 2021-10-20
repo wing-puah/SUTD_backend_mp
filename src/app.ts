@@ -10,7 +10,7 @@ function errorResponder(err: Error, req: Request, res: Response, next: NextFunct
   res.status(500).json({ error: err.message });
 }
 
-export const createApp = (router: Router): Express => {
+export default function createApp(router: Router): Express {
   const app = express();
   app.use(express.json());
   app.use(logger('common'));
@@ -43,4 +43,4 @@ export const createApp = (router: Router): Express => {
   app.use(errorResponder);
 
   return app;
-};
+}

@@ -1,6 +1,6 @@
-const express = require('express');
-const Todo = require('../models/todo.model');
-const UserTodoMap = require('../models/userTodoMap.model');
+import express from 'express';
+import { Todo } from '../models/todo.model';
+import { UserTodoMap } from '../models/userTodoMap.model';
 
 const itemsRoutes = require('./items.routes');
 const { queueUserInvites } = require('../services/email/producer');
