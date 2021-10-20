@@ -6,7 +6,7 @@ import { UserTodoMap } from '../models/userTodoMap.model';
 
 import { IDatabase } from '../db/index';
 
-const SALT_ROUNDS: number = parseInt(process.env.SALT_ROUNDS || '10');
+const SALT_ROUNDS: number = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10;
 const JWT_SECRET: string = process.env.JWT_SECRET || '';
 const JWT_EXPIRY: string | undefined = process.env.JWT_EXPIRY;
 

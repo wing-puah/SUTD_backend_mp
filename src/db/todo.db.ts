@@ -1,21 +1,20 @@
 import { Pool } from 'pg';
 
 import { Todo, SingleTodo } from '../models/todo.model';
-import { Item } from '../models/item.model';
 import { User } from '../models/user.model';
 import { UserTodoMap } from '../models/userTodoMap.model';
 
 interface ITodoDB {
-  insertTodo(item: Item, userId: User['id']): Promise<UserTodoMap>;
-  findAllTodos(userId: User['id']): Promise<UserTodoMap[]>;
+  insertTodo(todo: Todo, userId: User['id']): Promise<UserTodoMap>;
+  findAllTodos(userId: User['id']): Promise<UserTodoMap[] | []>;
   findTodo(id: Todo['id']): Promise<SingleTodo | null>;
   updateTodo(id: Todo): Promise<SingleTodo | null>;
   deleteTodo(id: Todo['id']): Promise<boolean>;
 }
 
 function todoDB(pool: Pool): ITodoDB {
-  async function insertTodo(item: Item, userId: User['id']) {
-    const res = await pool.query('INSERT INTO Todo (title) VALUES ($1) RETURNING *', [item.title]);
+  async function insertTodo(todo: Todo, userId: User['id']) {
+    const res = await pool.query('INSERT INTO Todo (title) VALUES ($1) RETURNING *', [todo.title]);
     const map = await pool.query(
       'INSERT INTO User_todo_map (uid, tid, role) VALUES ($1,$2,$3) RETURNING *',
       [userId, res.rows[0].id, 'creator']
