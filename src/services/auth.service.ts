@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { sign, JwtPayload, verify } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 import { User } from '../models/user.model';
@@ -6,18 +6,38 @@ import { UserTodoMap } from '../models/userTodoMap.model';
 
 import { IDatabase } from '../db/index';
 
-const SALT_ROUNDS: string | number = parseInt(process.env.SALT_ROUNDS || '10');
+const SALT_ROUNDS: number = parseInt(process.env.SALT_ROUNDS || '10');
 const JWT_SECRET: string = process.env.JWT_SECRET || '';
 const JWT_EXPIRY: string | undefined = process.env.JWT_EXPIRY;
 
-export default function AuthService(db: IDatabase) {
+type raw_password = string | number;
+
+type generateToken = (uid: User['email']) => ReturnType<typeof sign> | string;
+type generateTokenReturn = ReturnType<IAuthService['generateToken']>;
+
+interface jwtToken {
+  payload: string | JwtPayload | { uid: string };
+}
+
+export interface IAuthService {
+  generateToken: generateToken;
+  registerUser(user: User['email'], pw: raw_password): Promise<generateTokenReturn | null>;
+  loginUser(user: User['email'], pw: raw_password): Promise<generateTokenReturn | null>;
+  verifyToken(token: string | undefined | null): Promise<User['email'] | null | undefined>;
+  verifyUserAndTodo(
+    user: User['email'],
+    todoId: UserTodoMap['tid']
+  ): Promise<UserTodoMap | null | undefined>;
+}
+
+export default function AuthService(db: IDatabase): IAuthService {
   const service = {};
 
-  service.generateToken = (uid) => {
+  function generateToken(uid: User['email']) {
     return jwt.sign({ uid }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
-  };
+  }
 
-  service.registerUser = async (email, password) => {
+  async function registerUser(email: User['email'], password: raw_password) {
     const user = await db.findUserByUid(email);
 
     if (user) {
@@ -28,39 +48,49 @@ export default function AuthService(db: IDatabase) {
 
       const user = await db.insertUser(newUser);
 
-      return service.generateToken(user.email);
+      return generateToken(user.email);
     }
-  };
+  }
 
-  service.loginUser = async (email, password) => {
+  async function loginUser(email: User['email'], password: raw_password) {
     const user = await db.findUserByUid(email);
     if (user) {
       const isValid = await bcrypt.compare(String(password), String(user.password_hash));
       if (isValid) {
-        return service.generateToken(user.email);
+        return generateToken(user.email);
       }
+      return null;
     }
     return null;
-  };
+  }
 
-  service.verifyToken = async (token) => {
+  async function verifyToken(token: string) {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      const user = await db.findUserByUid(decoded.uid);
-      return user.email;
+      const decoded: jwtToken['payload'] = jwt.verify(token, JWT_SECRET);
+
+      if (typeof decoded !== 'string' && 'uid' in decoded) {
+        const user = await db.findUserByUid(decoded.uid);
+        return user && user.email;
+      }
     } catch (err) {
       return null;
     }
-  };
+  }
 
-  service.verifyUserAndTodo = async (userId, todoId) => {
+  async function verifyUserAndTodo(userId: User['email'], todoId: UserTodoMap['tid']) {
     try {
       const userTodoMap = new UserTodoMap({ uid: userId, tid: todoId });
       return await db.getTodoWithUser(userTodoMap);
     } catch (error) {
       return null;
     }
-  };
+  }
 
-  return service;
+  return {
+    generateToken,
+    registerUser,
+    loginUser,
+    verifyToken,
+    verifyUserAndTodo,
+  };
 }

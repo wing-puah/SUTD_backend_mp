@@ -6,8 +6,8 @@ type Role = 'creator' | 'editor';
 interface UserTodoMap {
   uid: User['id'];
   tid: Todo['id'];
-  role: Role;
-  title: Todo['title'];
+  role?: Role;
+  title?: Todo['title'];
 }
 
 class UserTodoMap {
