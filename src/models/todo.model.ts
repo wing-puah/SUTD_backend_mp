@@ -1,3 +1,4 @@
+import { Item } from './item.model';
 interface Todo {
   id?: number;
   title: string;
@@ -11,4 +12,8 @@ class Todo {
   }
 }
 
-export { Todo };
+interface SingleTodo extends Todo {
+  items?: Item[];
+}
+
+export { Todo, SingleTodo };

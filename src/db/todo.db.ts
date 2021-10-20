@@ -1,19 +1,29 @@
-import { Todo } from '../models/todo.model';
+import { Pool } from 'pg';
+
+import { Todo, SingleTodo } from '../models/todo.model';
+import { Item } from '../models/item.model';
+import { User } from '../models/user.model';
 import { UserTodoMap } from '../models/userTodoMap.model';
 
-module.exports = (pool) => {
-  const db = {};
+interface ITodoDB {
+  insertTodo(item: Item, userId: User['id']): Promise<UserTodoMap>;
+  findAllTodos(userId: User['id']): Promise<UserTodoMap[]>;
+  findTodo(id: Todo['id']): Promise<SingleTodo | null>;
+  updateTodo(id: Todo): Promise<SingleTodo | null>;
+  deleteTodo(id: Todo['id']): Promise<boolean>;
+}
 
-  db.insertTodo = async (item, userId) => {
+function todoDB(pool: Pool): ITodoDB {
+  async function insertTodo(item: Item, userId: User['id']) {
     const res = await pool.query('INSERT INTO Todo (title) VALUES ($1) RETURNING *', [item.title]);
     const map = await pool.query(
       'INSERT INTO User_todo_map (uid, tid, role) VALUES ($1,$2,$3) RETURNING *',
       [userId, res.rows[0].id, 'creator']
     );
     return { ...new UserTodoMap({ ...res.rows[0], ...map.rows[0] }) };
-  };
+  }
 
-  db.findAllTodos = async (userId) => {
+  async function findAllTodos(userId: User['id']) {
     const res = await pool.query(
       `
       SELECT * 
@@ -24,9 +34,9 @@ module.exports = (pool) => {
       [userId]
     );
     return res.rows.map((row) => new UserTodoMap(row));
-  };
+  }
 
-  db.findTodo = async (id) => {
+  async function findTodo(id: Todo['id']) {
     const res = await pool.query(
       `
     SELECT *, 
@@ -40,19 +50,22 @@ module.exports = (pool) => {
     );
 
     return res.rowCount > 0 ? res.rows[0] : null;
-  };
+  }
 
-  db.updateTodo = async (todo) => {
+  async function updateTodo(todo: Todo) {
     const { title, id } = todo;
     const res = await pool.query(`UPDATE Todo SET title=$1 WHERE id=$2 RETURNING *`, [title, id]);
 
     return res.rowCount > 0 ? new Todo(res.rows[0]) : null;
-  };
+  }
 
-  db.deleteTodo = async (id) => {
+  async function deleteTodo(id: Todo['id']) {
     const res = await pool.query('DELETE FROM Todo WHERE id=$1', [id]);
     return res.rowCount > 0;
-  };
+  }
 
-  return db;
-};
+  return { insertTodo, findAllTodos, findTodo, updateTodo, deleteTodo };
+}
+
+export { ITodoDB };
+export default todoDB;

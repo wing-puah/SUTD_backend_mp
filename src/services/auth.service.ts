@@ -4,11 +4,13 @@ import bcrypt from 'bcrypt';
 import { User } from '../models/user.model';
 import { UserTodoMap } from '../models/userTodoMap.model';
 
-const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRY = process.env.JWT_EXPIRY;
+import { IDatabase } from '../db/index';
 
-export default function AuthService(db) {
+const SALT_ROUNDS: string | number = parseInt(process.env.SALT_ROUNDS || '10');
+const JWT_SECRET: string = process.env.JWT_SECRET || '';
+const JWT_EXPIRY: string | undefined = process.env.JWT_EXPIRY;
+
+export default function AuthService(db: IDatabase) {
   const service = {};
 
   service.generateToken = (uid) => {

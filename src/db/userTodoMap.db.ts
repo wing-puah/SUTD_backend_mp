@@ -1,9 +1,14 @@
+import { Pool } from 'pg';
 import { UserTodoMap } from '../models/userTodoMap.model';
 
-module.exports = (pool) => {
-  const db = {};
+interface IUserTodoMapDb {
+  getAllPermissionedUser(todoId: UserTodoMap['tid']): Promise<UserTodoMap>;
+  getTodoWithUser(userTodoMap: UserTodoMap): Promise<UserTodoMap | null>;
+  givePermissionToUser(userTodoMap: UserTodoMap): Promise<UserTodoMap | null>;
+}
 
-  db.getAllPermissionedUser = async (todoId) => {
+function userTodoMap(pool: Pool): IUserTodoMapDb {
+  async function getAllPermissionedUser(todoId: UserTodoMap['tid']) {
     const res = await pool.query(
       `
       SELECT ARRAY(SELECT um.uid
@@ -15,9 +20,9 @@ module.exports = (pool) => {
     );
 
     return res.rows[0];
-  };
+  }
 
-  db.getTodoWithUser = async (userTodoMap) => {
+  async function getTodoWithUser(userTodoMap: UserTodoMap) {
     const res = await pool.query(
       `
       SELECT um
@@ -29,9 +34,9 @@ module.exports = (pool) => {
     );
 
     return res.rowCount ? new UserTodoMap(res.rows[0]) : null;
-  };
+  }
 
-  db.givePermissionToUser = async (userTodoMap) => {
+  async function givePermissionToUser(userTodoMap: UserTodoMap) {
     const res = await pool.query(
       `INSERT INTO User_todo_map (uid, tid, role) 
           VALUES ($1,$2, $3) 
@@ -41,7 +46,10 @@ module.exports = (pool) => {
     );
 
     return res.rowCount ? new UserTodoMap(res.rows[0]) : null;
-  };
+  }
 
-  return db;
-};
+  return { getAllPermissionedUser, getTodoWithUser, givePermissionToUser };
+}
+
+export { IUserTodoMapDb };
+export default userTodoMap;
